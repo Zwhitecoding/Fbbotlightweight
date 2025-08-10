@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bot Console Logs</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  .fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-[#0d1117] to-[#161b22] text-gray-200 h-screen flex flex-col">
+
+  <header class="bg-[#21262d] border-b border-[#30363d] px-4 py-3 flex items-center space-x-2">
+    <div class="flex space-x-2">
+      <div class="w-3 h-3 rounded-full bg-red-500"></div>
+      <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+      <div class="w-3 h-3 rounded-full bg-green-500"></div>
+    </div>
+    <span class="ml-3 font-bold text-lg">Bot Console Logs</span>
+  </header>
+
+  <div id="log-container" class="flex-1 overflow-y-auto p-4 text-sm md:text-base space-y-1">
+    <p class="text-gray-400">Fetching logs...</p>
+  </div>
+
+  <script>
+    const logContainer = document.getElementById('log-container');
+
+    async function fetchLogs() {
+      try {
+        const res = await fetch('/logs');
+        let text = await res.text();
+        const lines = text.split("\n").filter(l => l.trim() !== "").map(line => {
+          let colorClass = "text-gray-300";
+          if (line.includes("❌")) colorClass = "text-red-400";
+          else if (line.includes("✨") || line.includes("✅") || line.includes("🛠️")) colorClass = "text-blue-400";
+          return `<div class="${colorClass} fade-in">${line}</div>`;
+        }).join("");
+        logContainer.innerHTML = lines;
+        logContainer.scrollTop = logContainer.scrollHeight;
+      } catch (e) {
+        logContainer.innerHTML = `<p class="text-red-400 fade-in">Error fetching logs</p>`;
+      }
+    }
+
+    setInterval(fetchLogs, 1500);
+    fetchLogs();
+  </script>
+</body>
+</html>
